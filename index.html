@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Herramienta para recopilar y exportar datos de monitoreo ambiental en campo.">
+  <meta name="keywords" content="monitoreo ambiental, datos ambientales, exportar PDF, herramienta ambiental, monitoreo aire agua suelo ruido">
+  <meta name="author" content="Santiago Diaz Echavarria">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <title>🌿 Monitor Ambiental</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #e0f7fa, #e8f5e9);
+      color: #333;
+    }
+    .fade-in {
+      animation: fadeIn 1s ease-in-out both;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .input {
+      border: 1px solid #D1D5DB; /* border-gray-300 */
+      border-radius: 0.375rem; /* rounded-md */
+      padding-left: 1rem; /* px-4 */
+      padding-right: 1rem; /* px-4 */
+      padding-top: 0.5rem; /* py-2 */
+      padding-bottom: 0.5rem; /* py-2 */
+      width: 100%; /* w-full */
+      box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); /* shadow-sm */
+      outline: none;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .input:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px #10B981; /* focus:ring-2 focus:ring-green-500 */
+      border-color: #10B981;
+    }
+    .section-card {
+      background: #fff; /* bg-white */
+      padding: 1.5rem; /* p-6 */
+      border-radius: 0.75rem; /* rounded-xl */
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* shadow-md */
+      margin-bottom: 1.5rem; /* mb-6 */
+      transition: transform 0.2s;
+    }
+    .section-card:hover {
+      transform: scale(1.05); /* hover:scale-105 */
+    }
+  </style>
+</head>
+<body class="p-6">
+  <header class="text-center mb-10 fade-in">
+    <h1 class="text-4xl font-bold text-green-700 mb-2">🌱 Herramienta para Monitores Ambientales</h1>
+    <p class="text-lg text-gray-600">Recopila y exporta datos de monitoreo ambiental en campo</p>
+  </header>
+
+  <form id="dataForm" class="grid grid-cols-1 lg:grid-cols-2 gap-6 fade-in">
+    <div class="section-card"> <!-- Aire -->
+      <h2 class="text-xl font-semibold text-green-700 mb-4">🌬 Aire</h2>
+      <input name="pm10" placeholder="PM10 (μg/m³)" type="number" class="input">
+      <input name="pm2_5" placeholder="PM2.5 (μg/m³)" type="number" class="input">
+      <input name="no2" placeholder="NOₓ (ppb)" type="number" class="input">
+      <input name="so2" placeholder="SO₂ (ppb)" type="number" class="input">
+      <input name="co" placeholder="CO (ppm)" type="number" class="input">
+      <input name="o3" placeholder="O₃ (ppb)" type="number" class="input">
+    </div>
+    
+    <div class="section-card"> <!-- Agua -->
+      <h2 class="text-xl font-semibold text-blue-700 mb-4">💧 Agua</h2>
+      <input name="ph_agua" placeholder="pH" type="number" step="any" class="input">
+      <input name="oxigeno" placeholder="Oxígeno disuelto (mg/L)" type="number" class="input">
+      <input name="conductividad" placeholder="Conductividad (μS/cm)" type="number" class="input">
+      <input name="turbidez" placeholder="Turbidez (NTU)" type="number" class="input">
+      <input name="coliformes" placeholder="Coliformes totales (NMP/100mL)" type="number" class="input">
+      <input name="Solidos_suspendidos_totales" placeholder="Solidos suspendidos totales (ppm)" type="number" class="input">
+      <input name="Solidos_totales_disueltos" placeholder="Solidos totales disueltos (ppm)" type="number" class="input">
+      <input name="Carbonato_calcio" placeholder="Carbonato de Calcio (ppm)" type="number" class="input">
+    </div>
+
+    <div class="section-card"> <!-- Suelo -->
+      <h2 class="text-xl font-semibold text-yellow-700 mb-4">🌾 Suelo</h2>
+      <input name="ph_suelo" placeholder="pH del suelo" type="number" class="input">
+      <input name="humedad" placeholder="Humedad (%)" type="number" class="input">
+      <input name="compactacion" placeholder="Compactación (kg/cm²)" type="number" class="input">
+      <input name="materia_organica" placeholder="Materia orgánica (%)" type="number" class="input">
+      <input name="temperatura_suelo" placeholder="Temperatura (°C)" type="number" class="input">
+    </div>
+
+    <div class="section-card"> <!-- Ruido -->
+      <h2 class="text-xl font-semibold text-red-700 mb-4">🔊 Ruido</h2>
+      <input name="decibeles" placeholder="Nivel de ruido (dB)" type="number" class="input">
+      <input name="picos_ruido" placeholder="Frecuencia de picos altos (eventos/hora)" type="number" class="input">
+    </div>
+  </form>
+
+  <div class="text-center my-8 fade-in">
+    <button onclick="generarPDF()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full shadow-md transition">📄 Generar PDF</button>
+  </div>
+
+  <section class="section-card max-w-4xl mx-auto fade-in">
+    <h2 class="text-2xl font-bold mb-2">📘 Guía para el Monitoreo Ambiental</h2>
+    <p class="mb-2">El monitoreo ambiental incluye múltiples parámetros según el componente estudiado:</p>
+    <ul class="list-disc list-inside mb-4 text-sm">
+      <li><strong>Aire:</strong> PM10, PM2.5, NO₂, SO₂, CO, O₃. Referencia: Resolución 2254/2017.</li>
+      <li><strong>Agua:</strong> pH, oxígeno disuelto, turbidez, metales, coliformes. Referencia: Decreto 1594/1984 y Resolución 2115/2007.</li>
+      <li><strong>Suelo:</strong> pH, humedad, compactación, nutrientes. Sin norma específica, guía técnica ICA/IDEAM.</li>
+      <li><strong>Ruido:</strong> Niveles en dB(A). Referencia: Resolución 627/2006.</li>
+    </ul>
+    <p class="text-sm"><strong>SST:</strong> Usa protección personal y aplica el SG-SST (Decreto 1072/2015) al hacer trabajo de campo.</p>
+  </section>
+
+  <footer class="text-center text-white py-4 mt-10 bg-green-700 fade-in">
+    <p>&copy; 2025 Santiago Diaz Echavarria — Desarrollado para uso académico</p>
+  </footer>
+
+  <script>
+    async function generarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const form = document.getElementById("dataForm");
+      const formData = new FormData(form);
+      let y = 20;
+
+      doc.setFontSize(16);
+      doc.text("Reporte de Monitoreo Ambiental", 14, y);
+      y += 10;
+      doc.setFontSize(12);
+
+      for (let [key, value] of formData.entries()) {
+        if (value.trim() !== '') {
+          const label = key.replace(/_/g, ' ').toUpperCase();
+          doc.text(`${label}: ${value}`, 14, y);
+          y += 8;
+          if (y > 280) {
+            doc.addPage();
+            y = 20;
+          }
+        }
+      }
+
+      doc.save("reporte_monitoreo.pdf");
+    }
+  </script>
+</body>
+</html>
